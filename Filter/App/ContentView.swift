@@ -7,6 +7,30 @@
 
 import SwiftUI
 import MapKit
+
+class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
+    private let locationManager = CLLocationManager()
+    @Published var location: CLLocation? = nil
+    
+    override init() {
+        super.init()
+        self.locationManager.delegate = self
+        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        self.locationManager.requestWhenInUseAuthorization()
+        self.locationManager.startUpdatingLocation()
+        print(location ?? "no location")
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let location = locations.last else {
+            return
+        }
+        self.location = location
+        print(location)
+    }
+    
+}
+
 struct MapView: UIViewRepresentable {
     
     func makeUIView(context: Context) -> MKMapView {
@@ -23,6 +47,8 @@ struct MapView: UIViewRepresentable {
 }
 
 struct ContentView: View {
+    
+    @ObservedObject var locationManager = LocationManager()
     var body: some View {
         MapView()
             .edgesIgnoringSafeArea(.all)
